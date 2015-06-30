@@ -1,0 +1,27 @@
+#!/bin/bash
+path=( `echo $PATH | tr ":" " "`)
+
+#function to check traverse throught path and see if path is correct
+function locate()
+{
+	local name=${1}
+	for f in ${path[*]}
+	do
+		if [ -x $f'/'${1} ]        #check to see if it our passed in argument is an executable
+		then if [[ $f == "/bin" ]] #if f is /bin then we append a '/' ourself before we echo since bin does not have '/' in PATH
+			then echo $f'/'$name
+				break
+			else echo $f$name
+				break
+		fi
+	#	exit 0
+	fi
+	done
+}
+
+#main for loop to traverse through each argument and find path
+for d in $*
+	do
+	#pass in each argument as a parameter to the function
+	locate $d
+done
