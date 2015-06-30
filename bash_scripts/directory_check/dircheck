@@ -1,0 +1,32 @@
+#!/bin/bash
+#count the directories/file, empty files will be included in the count
+count_sub=0;
+count_file=0;
+#traverse through each argument
+for f in $*
+do
+	#check the contents in the directory and maintain counter for files/directories
+	for file in "$f"/*
+	do
+		if [ -d $file ]
+		then ((count_sub++)) 
+		elif [ -f $file ]
+		then ((count_file++))
+		fi
+	done
+	#find empty size file with find
+	echo Finding empty files in directory, $f
+	echo Empty files found were:
+	find $f -maxdepth 1 -size 0 
+	#display the two counters for file and directory then reset them for next iteration
+	echo There are $count_sub directories in $f
+	echo There are $count_file files in $f
+	echo $f takes up the following amount of storage space
+	#output the storage space the specified directory takes up only
+	#the -h will make it output the storage space taken up by K,M,G etc
+	du -s -h $f
+	echo -e "\n"
+	count_sub=0;
+	count_file=0;
+done
+
