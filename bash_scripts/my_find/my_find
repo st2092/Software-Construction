@@ -1,0 +1,121 @@
+#!/bin/bash
+
+#recursive function to 
+#function recur()
+#{
+#	for file in "$1"/*
+#	do
+#		if [ -d "$file" ]
+#		then
+#			echo $file is a directory
+#			recur "$file"
+#		elif [ -f "$file" ]
+#		then
+#			echo $file is a file
+#		fi
+#	done
+#}
+#
+
+#the passed in variable will the path 
+function traverseDir()
+{
+	#expand the path variable passed in so we can traverse through every file/subdirectory
+	#and try to see if any of them matches with what we are trying to search for
+	for i in "$1"/*
+	do
+		if [[ -d $i && $type == "d" && $i == $searchfor ]]
+		then
+			exec $cmd $searchfor
+		elif [[ -f $i && $type == "f" && $i == $searchfor ]]
+		then
+			echo $searchfor
+			exec $cmd $searchfor
+		fi
+	done
+}
+
+flags="";
+exe="";
+cmd="";
+path=${1};
+name="";
+type="";
+others="";
+blash="";
+exe2="";
+sub="";
+nameflag="";
+#for loop to go through each argument and separate them with switch cases
+for f in $*
+do
+case $f in
+	(-*) 
+		flags=$f
+		if [[ $f == "-exec" ]]
+			then
+			exe=1
+			exe2=1
+		elif [[ $f == "-type" ]]
+			then
+			type=1
+		elif [[ $f == "-name" ]]
+			then
+			name=1;
+			nameflag=1;
+		fi
+		;;
+	(*)
+		others=$f
+		#echo f is $f
+		if [[ $name == 1 ]]
+		then
+			name=$f
+		#for debugging purpose
+		#	echo The file name is $name
+		elif [[ $type == 1 ]]
+		then
+			type=$f	
+		#for debugging purpose
+		#	echo The file type to search is $type
+		elif [[ $exe2 == 1 ]]
+		then
+			cmd=$f
+			exe2=0;
+		#for debugging purpose
+		#	echo the command is $cmd
+		elif [[ $others == "{}" ]]
+		then
+			sub=1;
+		#for debugging purpose
+		#	echo substitution found
+		elif [[ $f == ";" ]]
+		then
+			blash=1
+		#for debugging purpose
+		#	echo blacklash found
+		fi
+		;;
+esac
+done
+#variable to hold the the command path with all / replace for space
+holder="";
+#this is the full path to the file 
+searchfor=$path/$name
+#if nothing is missing then we will call the function to search
+if [[ $sub == 1 && $blash == 1 && $exe == 1 && $nameflag == 1 ]] 
+	then
+	#convert command by changing / to spaces 
+	holder=( `echo $cmd | tr "/" " "`)
+	for f in ${holder[*]}
+	do
+		if [[ $f != "bin" && $f != "usr" ]]
+		then
+			cmd=$f
+		fi
+	done
+#for debugging
+#	echo command is now $cmd
+#function call and passing in path as a parameter
+	traverseDir "$path"
+fi
